@@ -1,0 +1,11 @@
+.book-detail { max-width: 900px; margin: 0 auto; padding: 2rem; }
+.back { color: #6b7280; text-decoration: none; display: block; margin-bottom: 1.5rem; }
+.book-layout { display: grid; gap: 2rem; }
+@media (min-width: 768px) { .book-layout { grid-template-columns: 280px 1fr; } }
+.book-cover img { width: 100%; max-width: 280px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+.book-info h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+.book-author { font-size: 1.1rem; color: #6b7280; margin-bottom: 1rem; }
+.book-desc { margin: 1.5rem 0; color: #374151; line-height: 1.7; }
+.read-btn { width: 100%; max-width: 280px; padding: 1rem; font-size: 1.1rem; margin-top: 1.5rem; }
+.warning { margin-top: 1rem; padding: 1rem; background: #fef3c7; border-radius: 8px; color: #92400e; font-size: 0.9rem; }
+.warning a { color: #e94560; }

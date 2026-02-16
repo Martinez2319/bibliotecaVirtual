@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo - Biblioteca Virtual</title>
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/catalog.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="/" class="logo">📚 Biblioteca Virtual</a>
+      <div class="nav-links">
+        <a href="/">Inicio</a>
+        <a href="/catalog">Catálogo</a>
+        <a href="/login" id="loginLink">Iniciar Sesión</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="catalog">
+    <h1 style="margin-bottom:1.5rem;">Catálogo de Libros</h1>
+    <div class="filters">
+      <input type="text" id="search" placeholder="Buscar libros...">
+      <select id="category">
+        <option value="">Todas las categorías</option>
+      </select>
+      <select id="sort">
+        <option value="createdAt">Más recientes</option>
+        <option value="views">Más populares</option>
+        <option value="title">Título A-Z</option>
+      </select>
+    </div>
+    <div class="books-grid" id="books"></div>
+  </div>
+
+  <script>
+    async function loadCategories() {
+      const res = await fetch('/api/categories');
+      const cats = await res.json();
+      const select = document.getElementById('category');
+      cats.forEach(c => select.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+      const params = new URLSearchParams(location.search);
+      if (params.get('category')) select.value = params.get('category');
+    }
+
+    async function loadBooks() {
+      const search = document.getElementById('search').value;
+      const category = document.getElementById('category').value;
+      const sort = document.getElementById('sort').value;
+      
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (category) params.append('category', category);
+      params.append('sort', sort);
+
+      const res = await fetch(`/api/books?${params}`);
+      const books = await res.json();
+      
+      document.getElementById('books').innerHTML = books.map(b => `
+        <div class="book-card" onclick="location.href='/book/${b._id}'">
+          <img src="${b.coverUrl || 'https://via.placeholder.com/180x250'}" alt="${b.title}">
+          <div class="book-card-content">
+            <h3>${b.title}</h3>
+            <p>${b.author}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    let timeout;
+    document.getElementById('search').addEventListener('input', () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(loadBooks, 300);
+    });
+    document.getElementById('category').addEventListener('change', loadBooks);
+    document.getElementById('sort').addEventListener('change', loadBooks);
+
+    loadCategories().then(loadBooks);
+  </script>
+</body>
+</html>

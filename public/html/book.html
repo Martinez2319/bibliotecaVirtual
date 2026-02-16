@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libro - Biblioteca Virtual</title>
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/book.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="/" class="logo">📚 Biblioteca Virtual</a>
+      <div class="nav-links">
+        <a href="/">Inicio</a>
+        <a href="/catalog">Catálogo</a>
+        <span id="authLinks">
+          <a href="/login">Iniciar Sesión</a>
+        </span>
+        <span id="userMenu" style="display:none;">
+          <a href="/dashboard" id="adminLink" style="display:none;">Admin</a>
+          <span id="userName"></span>
+          <a href="#" id="logoutBtn">Salir</a>
+        </span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="book-detail">
+    <a href="/catalog" class="back">← Volver al catálogo</a>
+    <div class="book-layout">
+      <div class="book-cover">
+        <img id="cover" src="">
+      </div>
+      <div class="book-info">
+        <h1 id="title">Cargando...</h1>
+        <p class="book-author" id="author"></p>
+        <p class="book-desc" id="description"></p>
+        <button class="btn btn-primary read-btn" id="readBtn">📖 Leer Ahora</button>
+        <p class="warning" id="warning" style="display:none;">⚠️ Invitados: límite de 1 libro. <a href="/register">Regístrate</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const bookId = location.pathname.split('/').pop();
+
+    // Auth check
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const user = await res.json();
+          document.getElementById('authLinks').style.display = 'none';
+          document.getElementById('userMenu').style.display = 'inline';
+          document.getElementById('userName').textContent = user.name;
+          if (user.role === 'admin') document.getElementById('adminLink').style.display = 'inline';
+        }
+      } catch (e) {}
+    }
+
+    document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.href = '/';
+    });
+
+    async function loadBook() {
+      const res = await fetch(`/api/books/${bookId}`);
+      const book = await res.json();
+      
+      document.getElementById('cover').src = book.coverUrl || 'https://via.placeholder.com/280x400';
+      document.getElementById('title').textContent = book.title;
+      document.getElementById('author').textContent = book.author;
+      document.getElementById('description').textContent = book.description || 'Sin descripción.';
+      document.title = book.title + ' - Biblioteca Virtual';
+
+      // Check guest
+      const auth = await fetch('/api/auth/me');
+      if (!auth.ok) document.getElementById('warning').style.display = 'block';
+    }
+
+    document.getElementById('readBtn').addEventListener('click', async () => {
+      const res = await fetch(`/api/books/${bookId}/read`, { method: 'POST' });
+      const data = await res.json();
+      if (data.allowed) {
+        location.href = `/reader/${bookId}`;
+      } else {
+        alert(data.message);
+      }
+    });
+
+    checkAuth();
+    loadBook();
+  </script>
+</body>
+</html>

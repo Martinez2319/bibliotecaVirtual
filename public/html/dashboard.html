@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Biblioteca Virtual</title>
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="/" class="logo">📚 Biblioteca Virtual</a>
+      <div class="nav-links">
+        <a href="/">Inicio</a>
+        <a href="/catalog">Catálogo</a>
+        <a href="/dashboard" style="color:#e94560;">Admin</a>
+        <span id="userName"></span>
+        <a href="#" id="logoutBtn">Salir</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+    <h1 style="margin-bottom:1.5rem;">Panel de Administración</h1>
+
+    <div class="stats">
+      <div class="stat"><span class="stat-icon">📚</span><div><p class="stat-value" id="totalBooks">0</p><p class="stat-label">Libros</p></div></div>
+      <div class="stat"><span class="stat-icon">👥</span><div><p class="stat-value" id="totalUsers">0</p><p class="stat-label">Usuarios</p></div></div>
+      <div class="stat"><span class="stat-icon">📂</span><div><p class="stat-value" id="totalCategories">0</p><p class="stat-label">Categorías</p></div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="books">📚 Libros</button>
+      <button class="tab" data-tab="categories">📂 Categorías</button>
+      <button class="tab" data-tab="users">👥 Usuarios</button>
+    </div>
+
+    <div class="tab-content active" id="books-tab">
+      <div class="tab-header">
+        <input type="text" id="searchBooks" placeholder="Buscar libros...">
+        <button class="btn btn-primary" onclick="openBookModal()">+ Nuevo Libro</button>
+      </div>
+      <table><thead><tr><th>Título</th><th>Autor</th><th>Formato</th><th>Vistas</th><th>Acciones</th></tr></thead><tbody id="booksTable"></tbody></table>
+    </div>
+
+    <div class="tab-content" id="categories-tab">
+      <div class="tab-header">
+        <button class="btn btn-primary" onclick="openCategoryModal()">+ Nueva Categoría</button>
+      </div>
+      <table><thead><tr><th>Nombre</th><th>Slug</th><th>Acciones</th></tr></thead><tbody id="categoriesTable"></tbody></table>
+    </div>
+
+    <div class="tab-content" id="users-tab">
+      <table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Acciones</th></tr></thead><tbody id="usersTable"></tbody></table>
+    </div>
+  </div>
+
+  <!-- Book Modal -->
+  <div class="modal" id="bookModal">
+    <div class="modal-content">
+      <h2 id="bookModalTitle">Nuevo Libro</h2>
+      <form id="bookForm">
+        <input type="hidden" id="bookId">
+        <div class="form-group"><label>Título *</label><input type="text" id="bookTitle" required></div>
+        <div class="form-group"><label>Autor *</label><input type="text" id="bookAuthor" required></div>
+        <div class="form-group"><label>Descripción</label><textarea id="bookDesc" rows="3"></textarea></div>
+        <div class="form-group"><label>Categorías (separadas por coma)</label><input type="text" id="bookCategories"></div>
+        <div class="form-group"><label>URL Portada (imagen)</label><input type="text" id="bookCover" placeholder="https://... o /images/portada.jpg"></div>
+        <div class="form-group"><label>📄 URL del PDF</label><input type="text" id="bookPdf" placeholder="/pdfs/mi-libro.pdf"></div>
+        <div class="form-group"><label>📝 Contenido (texto)</label><textarea id="bookContent" rows="10" placeholder="Texto del libro..." style="min-height:200px;"></textarea></div>
+        <p style="font-size:0.85rem;color:#6b7280;margin-bottom:1rem;">💡 Puedes agregar PDF, texto o ambos. El lector detectará automáticamente.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeBookModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div class="modal" id="categoryModal">
+    <div class="modal-content">
+      <h2 id="categoryModalTitle">Nueva Categoría</h2>
+      <form id="categoryForm">
+        <input type="hidden" id="categoryId">
+        <div class="form-group"><label>Nombre</label><input type="text" id="categoryName" required></div>
+        <div class="form-group"><label>Slug</label><input type="text" id="categorySlug" required></div>
+        <div class="form-group"><label>Descripción</label><textarea id="categoryDesc" rows="2"></textarea></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeCategoryModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/javascript/dashboard.js"></script>
+</body>
+</html>

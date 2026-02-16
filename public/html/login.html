@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - Biblioteca Virtual</title>
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-form">
+      <a href="/" class="logo">📚 Biblioteca Virtual</a>
+      <h1>Bienvenido de vuelta</h1>
+      <p>Ingresa tus credenciales</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" id="email" required placeholder="tu@email.com">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+      </form>
+      <div class="demo">
+        <strong>Admin:</strong> admin@biblioteca.com / admin123
+      </div>
+      <p class="link">¿No tienes cuenta? <a href="/register">Regístrate</a></p>
+    </div>
+    <div class="login-image"></div>
+  </div>
+  <script src="/javascript/login.js"></script>
+</body>
+</html>

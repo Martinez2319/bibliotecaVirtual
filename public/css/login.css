@@ -1,0 +1,26 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #fafafa; }
+
+.login-container { display: flex; min-height: 100vh; }
+.login-form { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 3rem; max-width: 450px; }
+.login-image { flex: 1; background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200') center/cover; display: none; }
+@media (min-width: 768px) { .login-image { display: block; } }
+
+.logo { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; text-decoration: none; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; color: #1a1a2e; margin-bottom: 0.5rem; }
+p { color: #6b7280; margin-bottom: 1.5rem; }
+
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.form-group input { width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
+.form-group input:focus { outline: none; border-color: #e94560; }
+
+.btn { width: 100%; padding: 0.875rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.btn-primary { background: #1a1a2e; color: white; }
+.btn-accent { background: #e94560; color: white; }
+
+.demo { margin-top: 1.5rem; padding: 1rem; background: #f3f4f6; border-radius: 8px; font-size: 0.875rem; color: #6b7280; }
+.link { margin-top: 1.5rem; text-align: center; }
+.link a { color: #e94560; text-decoration: none; font-weight: 500; }
+
+.error { color: #dc2626; background: #fef2f2; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; }

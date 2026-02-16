@@ -1,0 +1,32 @@
+.dashboard { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.stat { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 1rem; }
+.stat-icon { font-size: 2rem; }
+.stat-value { font-size: 2rem; font-weight: 700; }
+.stat-label { color: #6b7280; font-size: 0.9rem; }
+
+.tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; }
+.tab { padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; border-radius: 8px; }
+.tab.active { background: #1a1a2e; color: white; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.tab-header { display: flex; justify-content: space-between; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
+.tab-header input { padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; width: 250px; }
+
+table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+th { background: #f9fafb; font-weight: 600; color: #6b7280; }
+
+.btn-sm { padding: 0.5rem; border: none; background: #f1f5f9; border-radius: 6px; cursor: pointer; margin-right: 0.25rem; }
+.btn-danger { background: #fef2f2; }
+
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal.active { display: flex; }
+.modal-content { background: white; padding: 2rem; border-radius: 16px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+.modal-content h2 { margin-bottom: 1.5rem; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
