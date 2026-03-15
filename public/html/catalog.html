@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Catálogo - Biblioteca Virtual</title>
+  <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/index.css">
   <link rel="stylesheet" href="/css/catalog.css">
 </head>
@@ -14,7 +16,15 @@
       <div class="nav-links">
         <a href="/">Inicio</a>
         <a href="/catalog">Catálogo</a>
-        <a href="/login" id="loginLink">Iniciar Sesión</a>
+        <span id="authLinks">
+          <a href="/login">Iniciar Sesión</a>
+          <a href="/register" class="btn btn-primary">Registrarse</a>
+        </span>
+        <span id="userMenu" style="display:none;">
+          <a href="/dashboard" id="adminLink" style="display:none;">Admin</a>
+          <span id="userName"></span>
+          <a href="#" id="logoutBtn">Salir</a>
+        </span>
       </div>
     </div>
   </nav>
@@ -35,12 +45,16 @@
     <div class="books-grid" id="books"></div>
   </div>
 
+  <script src="/javascript/common.js"></script>
   <script>
+    // Verificar autenticación al cargar
+    checkAuth();
+    setupLogout();
+
     async function loadCategories() {
-      const res = await fetch('/api/categories');
-      const cats = await res.json();
+      const cats = await fetch('/api/categories').then(r => r.json());
       const select = document.getElementById('category');
-      cats.forEach(c => select.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+      cats.forEach(c => select.innerHTML += `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`);
       const params = new URLSearchParams(location.search);
       if (params.get('category')) select.value = params.get('category');
     }
@@ -55,18 +69,8 @@
       if (category) params.append('category', category);
       params.append('sort', sort);
 
-      const res = await fetch(`/api/books?${params}`);
-      const books = await res.json();
-      
-      document.getElementById('books').innerHTML = books.map(b => `
-        <div class="book-card" onclick="location.href='/book/${b._id}'">
-          <img src="${b.coverUrl || 'https://via.placeholder.com/180x250'}" alt="${b.title}">
-          <div class="book-card-content">
-            <h3>${b.title}</h3>
-            <p>${b.author}</p>
-          </div>
-        </div>
-      `).join('');
+      const books = await fetch(`/api/books?${params}`).then(r => r.json());
+      document.getElementById('books').innerHTML = books.map(renderBookCard).join('');
     }
 
     let timeout;
@@ -79,5 +83,8 @@
 
     loadCategories().then(loadBooks);
   </script>
+  <!-- Botpress Webchat -->
+  <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
+  <script src="https://files.bpcontent.cloud/2026/03/06/05/20260306052011-BLL4JDG8.js"></script>
 </body>
 </html>

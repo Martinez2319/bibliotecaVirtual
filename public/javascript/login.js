@@ -1,3 +1,4 @@
+// Biblioteca Virtual - Login
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('email').value;
@@ -12,7 +13,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const data = await res.json();
     
     if (res.ok) {
-      window.location.href = data.user.role === 'admin' ? '/dashboard' : '/';
+      location.href = data.user.role === 'admin' ? '/dashboard' : '/';
     } else {
       alert(data.error || 'Credenciales inválidas');
     }

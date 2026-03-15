@@ -1,54 +1,44 @@
 const express = require('express');
 const router = express.Router();
 const Category = require('../models/Category');
+const { adminOnly } = require('../middleware/auth');
 
-// Obtener categorías
+// GET categorías
 router.get('/', async (req, res) => {
   try {
-    const categories = await Category.find();
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json(await Category.find());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Crear categoría (admin)
-router.post('/', async (req, res) => {
+// POST crear categoría (admin)
+router.post('/', adminOnly, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
-    const category = new Category(req.body);
-    await category.save();
+    const category = await new Category(req.body).save();
     res.json(category);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Actualizar categoría (admin)
-router.put('/:id', async (req, res) => {
+// PUT actualizar categoría (admin)
+router.put('/:id', adminOnly, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(category);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Eliminar categoría (admin)
-router.delete('/:id', async (req, res) => {
+// DELETE eliminar categoría (admin)
+router.delete('/:id', adminOnly, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
     await Category.findByIdAndDelete(req.params.id);
     res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

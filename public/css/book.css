@@ -1,11 +1,45 @@
-.book-detail { max-width: 900px; margin: 0 auto; padding: 2rem; }
-.back { color: #6b7280; text-decoration: none; display: block; margin-bottom: 1.5rem; }
-.book-layout { display: grid; gap: 2rem; }
-@media (min-width: 768px) { .book-layout { grid-template-columns: 280px 1fr; } }
-.book-cover img { width: 100%; max-width: 280px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-.book-info h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-.book-author { font-size: 1.1rem; color: #6b7280; margin-bottom: 1rem; }
-.book-desc { margin: 1.5rem 0; color: #374151; line-height: 1.7; }
-.read-btn { width: 100%; max-width: 280px; padding: 1rem; font-size: 1.1rem; margin-top: 1.5rem; }
-.warning { margin-top: 1rem; padding: 1rem; background: #fef3c7; border-radius: 8px; color: #92400e; font-size: 0.9rem; }
-.warning a { color: #e94560; }
+/* Book Detail Page Styles */
+.book-detail { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+
+.back { color: var(--muted); text-decoration: none; display: inline-block; margin-bottom: 1.25rem; font-size: 0.95rem; }
+.back:hover { color: var(--accent); }
+
+.book-layout { display: grid; gap: 1.5rem; }
+.book-cover img { width: 100%; max-width: 250px; border-radius: var(--radius-lg); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+
+.book-info h1 { font-size: clamp(1.4rem, 4vw, 2rem); margin-bottom: 0.5rem; }
+.book-author { font-size: clamp(0.95rem, 2.5vw, 1.1rem); color: var(--muted); margin-bottom: 0.75rem; }
+.book-desc { margin: 1.25rem 0; color: #374151; line-height: 1.7; font-size: 0.95rem; }
+
+.read-btn { width: 100%; max-width: 250px; padding: 0.9rem; font-size: 1rem; margin-top: 1.25rem; }
+
+.warning {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  background: #fef3c7;
+  border-radius: var(--radius);
+  color: #92400e;
+  font-size: 0.85rem;
+}
+.warning a { color: var(--accent); font-weight: 500; }
+
+@media (min-width: 768px) {
+  .book-layout { grid-template-columns: 250px 1fr; gap: 2rem; }
+}
+
+@media (max-width: 768px) {
+  .book-detail { padding: 1.5rem 1rem; }
+  .book-cover { text-align: center; }
+  .book-cover img { max-width: 200px; }
+  .book-info { text-align: center; }
+  .read-btn { max-width: none; }
+}
+
+@media (max-width: 480px) {
+  .book-detail { padding: 1rem 0.75rem; }
+  .back { font-size: 0.9rem; }
+  .book-cover img { max-width: 180px; }
+  .book-desc { font-size: 0.9rem; margin: 1rem 0; }
+  .read-btn { padding: 0.8rem; font-size: 0.95rem; }
+  .warning { padding: 0.75rem; font-size: 0.8rem; }
+}

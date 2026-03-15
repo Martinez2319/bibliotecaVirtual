@@ -2,12 +2,27 @@ const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
 const AccessLog = require('../models/AccessLog');
+const { adminOnly } = require('../middleware/auth');
 
-// Obtener todos los libros
+// Helper: Procesar URLs remotas
+function processUrls(book) {
+  const obj = book.toObject ? book.toObject() : { ...book };
+  if (obj.coverUrl?.startsWith('remote:')) {
+    obj.coverUrl = `/api/remote/file/cover/${encodeURIComponent(obj.coverUrl.slice(7))}`;
+    obj.isRemoteCover = true;
+  }
+  if (obj.pdfUrl?.startsWith('remote:')) {
+    obj.pdfUrl = `/api/remote/file/pdf/${encodeURIComponent(obj.pdfUrl.slice(7))}`;
+    obj.isRemotePdf = true;
+  }
+  return obj;
+}
+
+// GET todos los libros
 router.get('/', async (req, res) => {
   try {
     const { search, category, sort = 'createdAt' } = req.query;
-    let query = {};
+    const query = {};
     
     if (search) {
       query.$or = [
@@ -18,92 +33,80 @@ router.get('/', async (req, res) => {
     if (category) query.categories = category;
 
     const books = await Book.find(query).sort({ [sort]: sort === 'title' ? 1 : -1 });
-    res.json(books);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json(books.map(processUrls));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Libros destacados
+// GET destacados
 router.get('/featured', async (req, res) => {
   try {
     const books = await Book.find().sort({ views: -1 }).limit(10);
-    res.json(books);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json(books.map(processUrls));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Libros recientes
+// GET recientes
 router.get('/recent', async (req, res) => {
   try {
     const books = await Book.find().sort({ createdAt: -1 }).limit(10);
-    res.json(books);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json(books.map(processUrls));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Obtener un libro
+// GET un libro
 router.get('/:id', async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ error: 'Libro no encontrado' });
-    res.json(book);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json(processUrls(book));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Crear libro (admin)
-router.post('/', async (req, res) => {
+// POST crear libro (admin)
+router.post('/', adminOnly, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
-    const book = new Book(req.body);
-    await book.save();
+    const book = await new Book(req.body).save();
     res.json(book);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Actualizar libro (admin)
-router.put('/:id', async (req, res) => {
+// PUT actualizar libro (admin)
+router.put('/:id', adminOnly, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
     const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(book);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Eliminar libro (admin)
-router.delete('/:id', async (req, res) => {
+// DELETE eliminar libro (admin)
+router.delete('/:id', adminOnly, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
     await Book.findByIdAndDelete(req.params.id);
     res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Registrar lectura (control invitados)
+// POST registrar lectura
 router.post('/:id/read', async (req, res) => {
   try {
     const bookId = req.params.id;
     await Book.findByIdAndUpdate(bookId, { $inc: { views: 1 } });
 
-    if (req.user) {
-      return res.json({ allowed: true, message: 'Acceso como usuario registrado' });
-    }
+    if (req.user) return res.json({ allowed: true, message: 'Acceso como usuario registrado' });
 
     const identifier = req.ip;
     const guestReads = await AccessLog.countDocuments({ identifier });
@@ -116,8 +119,8 @@ router.post('/:id/read', async (req, res) => {
 
     await AccessLog.create({ identifier, bookId });
     res.json({ allowed: true, message: 'Acceso concedido' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Biblioteca Virtual</title>
+  <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/index.css">
 </head>
 <body>
@@ -54,23 +55,6 @@
     <p>© 2024 Biblioteca Virtual</p>
   </footer>
 
-  <!-- Chat Widget -->
-  <button class="chat-btn" id="chatBtn">💬</button>
-  <div class="chat-window" id="chatWindow">
-    <div class="chat-header">
-      <span>🤖 Asistente</span>
-      <button onclick="toggleChat()">✕</button>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="message bot">¡Hola! ¿En qué puedo ayudarte?</div>
-    </div>
-    <div class="chat-input">
-      <input type="text" id="chatInput" placeholder="Escribe...">
-      <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
-    </div>
-  </div>
-
-  <!-- Donate Modal -->
   <div class="modal" id="donateModal">
     <div class="modal-content">
       <h2>💝 Apoya la Biblioteca</h2>
@@ -80,11 +64,16 @@
         <button class="btn btn-outline" onclick="setAmount(25)">$25</button>
       </div>
       <input type="number" id="donateAmount" value="10" min="1">
-      <button class="btn btn-primary" style="width:100%;margin-top:0.5rem;" onclick="processDonation()">Donar</button>
+      <button class="btn btn-primary" style="width:100%;margin-top:0.5rem;" onclick="renderPaypal()">Donar con PayPal</button>
+      <div id="paypalButtons" style="margin-top:0.75rem;"></div>
       <button onclick="closeDonateModal()" style="width:100%;margin-top:0.5rem;background:none;border:none;cursor:pointer;">Cancelar</button>
     </div>
   </div>
 
+  <script src="/javascript/common.js"></script>
   <script src="/javascript/index.js"></script>
+  <!-- Botpress Webchat -->
+  <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
+  <script src="https://files.bpcontent.cloud/2026/03/06/05/20260306052011-BLL4JDG8.js"></script>
 </body>
 </html>

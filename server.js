@@ -17,14 +17,14 @@ const authRoutes = require('./routes/auth');
 const booksRoutes = require('./routes/books');
 const categoriesRoutes = require('./routes/categories');
 const usersRoutes = require('./routes/users');
-const chatRoutes = require('./routes/chat');
 const paypalRoutes = require('./routes/paypal');
+const remoteRoutes = require('./routes/remote');
 
 const app = express();
 
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -47,33 +47,34 @@ app.use('/api/auth', authRoutes);
 app.use('/api/books', booksRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/users', usersRoutes);
-app.use('/api/chat', chatRoutes);
 app.use('/api/paypal', paypalRoutes);
+app.use('/api/remote', remoteRoutes);
 
 // Stats (admin)
 app.get('/api/stats', async (req, res) => {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Acceso denegado' });
   }
-  const [totalBooks, totalUsers, totalCategories] = await Promise.all([
-    Book.countDocuments(),
-    User.countDocuments(),
-    Category.countDocuments()
-  ]);
-  res.json({ totalBooks, totalUsers, totalCategories });
+  try {
+    const [totalBooks, totalUsers, totalCategories] = await Promise.all([
+      Book.countDocuments(),
+      User.countDocuments(),
+      Category.countDocuments()
+    ]);
+    res.json({ totalBooks, totalUsers, totalCategories });
+  } catch (e) {
+    res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
 });
 
 // Seed data
 app.post('/api/seed', async (req, res) => {
   try {
-    const exists = await Book.countDocuments();
-    if (exists > 0) return res.json({ message: 'Ya hay datos' });
+    if (await Book.countDocuments() > 0) return res.json({ message: 'Ya hay datos' });
 
-    // Admin
     const hash = await bcrypt.hash('admin123', 10);
     await User.create({ name: 'Administrador', email: 'admin@biblioteca.com', passwordHash: hash, role: 'admin' });
 
-    // Categorías
     await Category.insertMany([
       { name: 'Ficción', slug: 'ficcion', description: 'Novelas y cuentos' },
       { name: 'Ciencia Ficción', slug: 'ciencia-ficcion', description: 'Futuros y tecnología' },
@@ -83,36 +84,38 @@ app.post('/api/seed', async (req, res) => {
       { name: 'Tecnología', slug: 'tecnologia', description: 'Ciencia y programación' }
     ]);
 
-    // Libros
     await Book.insertMany([
-      { title: 'Cien Años de Soledad', author: 'Gabriel García Márquez', description: 'Obra maestra del realismo mágico.', categories: ['Ficción'], coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400', content: 'Muchos años después, frente al pelotón de fusilamiento, el coronel Aureliano Buendía había de recordar aquella tarde remota en que su padre lo llevó a conocer el hielo...', views: 1250 },
-      { title: '1984', author: 'George Orwell', description: 'Novela distópica sobre un futuro totalitario.', categories: ['Ciencia Ficción', 'Ficción'], coverUrl: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400', content: 'Era un día luminoso y frío de abril y los relojes daban las trece...', views: 980 },
-      { title: 'El Principito', author: 'Antoine de Saint-Exupéry', description: 'Clásico sobre un pequeño príncipe.', categories: ['Ficción'], coverUrl: 'https://images.unsplash.com/photo-1589998059171-988d887df646?w=400', content: 'Una vez, cuando tenía seis años, vi una magnífica estampa...', views: 1500 },
-      { title: 'Don Quijote', author: 'Miguel de Cervantes', description: 'La obra maestra española.', categories: ['Ficción', 'Historia'], coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400', content: 'En un lugar de la Mancha, de cuyo nombre no quiero acordarme...', views: 750 },
-      { title: 'Orgullo y Prejuicio', author: 'Jane Austen', description: 'Novela de costumbres inglesas.', categories: ['Romance', 'Ficción'], coverUrl: 'https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=400', content: 'Es una verdad mundialmente reconocida que un hombre soltero...', views: 890 },
-      { title: 'Sherlock Holmes', author: 'Arthur Conan Doyle', description: 'El detective más famoso.', categories: ['Misterio'], coverUrl: 'https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?w=400', content: 'El señor Sherlock Holmes se levantaba tarde por las mañanas...', views: 720 },
-      { title: 'Dune', author: 'Frank Herbert', description: 'Épica de ciencia ficción.', categories: ['Ciencia Ficción'], coverUrl: 'https://images.unsplash.com/photo-1531988042231-d39a9cc12a9a?w=400', content: 'En la semana antes de su partida a Arrakis...', views: 620 },
-      { title: 'Inteligencia Artificial', author: 'Stuart Russell', description: 'Guía moderna sobre IA.', categories: ['Tecnología'], coverUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400', content: 'La inteligencia artificial es un campo de la informática...', views: 450 }
+      { title: 'Cien Años de Soledad', author: 'Gabriel García Márquez', description: 'Obra maestra del realismo mágico.', categories: ['Ficción'], coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400', content: 'Muchos años después, frente al pelotón de fusilamiento...', views: 1250 },
+      { title: '1984', author: 'George Orwell', description: 'Novela distópica sobre un futuro totalitario.', categories: ['Ciencia Ficción', 'Ficción'], coverUrl: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400', content: 'Era un día luminoso y frío de abril...', views: 980 },
+      { title: 'El Principito', author: 'Antoine de Saint-Exupéry', description: 'Clásico sobre un pequeño príncipe.', categories: ['Ficción'], coverUrl: 'https://images.unsplash.com/photo-1589998059171-988d887df646?w=400', content: 'Una vez, cuando tenía seis años...', views: 1500 },
+      { title: 'Don Quijote', author: 'Miguel de Cervantes', description: 'La obra maestra española.', categories: ['Ficción', 'Historia'], coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400', content: 'En un lugar de la Mancha...', views: 750 }
     ]);
 
-    res.json({ message: 'Datos creados', books: 8, categories: 6 });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json({ message: 'Datos creados', books: 4, categories: 6 });
+  } catch (e) {
+    res.status(500).json({ error: 'Error al crear datos iniciales' });
   }
 });
 
 // HTML Routes
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public/html/index.html')));
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public/html/login.html')));
-app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'public/html/register.html')));
-app.get('/catalog', (req, res) => res.sendFile(path.join(__dirname, 'public/html/catalog.html')));
-app.get('/book/:id', (req, res) => res.sendFile(path.join(__dirname, 'public/html/book.html')));
-app.get('/reader/:id', (req, res) => res.sendFile(path.join(__dirname, 'public/html/reader.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public/html/dashboard.html')));
+const htmlPath = p => path.join(__dirname, 'public/html', p);
+app.get('/', (req, res) => res.sendFile(htmlPath('index.html')));
+app.get('/login', (req, res) => res.sendFile(htmlPath('login.html')));
+app.get('/register', (req, res) => res.sendFile(htmlPath('register.html')));
+app.get('/catalog', (req, res) => res.sendFile(htmlPath('catalog.html')));
+app.get('/book/:id', (req, res) => res.sendFile(htmlPath('book.html')));
+app.get('/reader/:id', (req, res) => res.sendFile(htmlPath('reader.html')));
+app.get('/dashboard', (req, res) => res.sendFile(htmlPath('dashboard.html')));
+
+// 404 & Error handler
+app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
+app.use((err, req, res, next) => {
+  console.error('Error:', err.message);
+  res.status(500).json({ error: 'Error interno del servidor' });
+});
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
-
 mongoose.connect(`${process.env.MONGO_URL}/${process.env.DB_NAME}`)
   .then(() => {
     console.log('✅ MongoDB conectado');

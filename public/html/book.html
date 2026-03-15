@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Libro - Biblioteca Virtual</title>
+  <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/index.css">
   <link rel="stylesheet" href="/css/book.css">
 </head>
@@ -30,52 +31,37 @@
     <a href="/catalog" class="back">← Volver al catálogo</a>
     <div class="book-layout">
       <div class="book-cover">
-        <img id="cover" src="">
+        <img id="cover" src="" alt="Portada">
       </div>
       <div class="book-info">
         <h1 id="title">Cargando...</h1>
         <p class="book-author" id="author"></p>
         <p class="book-desc" id="description"></p>
+        <div id="formatBadges" style="margin-bottom:1rem;"></div>
         <button class="btn btn-primary read-btn" id="readBtn">📖 Leer Ahora</button>
         <p class="warning" id="warning" style="display:none;">⚠️ Invitados: límite de 1 libro. <a href="/register">Regístrate</a></p>
       </div>
     </div>
   </div>
 
+  <script src="/javascript/common.js"></script>
   <script>
     const bookId = location.pathname.split('/').pop();
 
-    // Auth check
-    async function checkAuth() {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (res.ok) {
-          const user = await res.json();
-          document.getElementById('authLinks').style.display = 'none';
-          document.getElementById('userMenu').style.display = 'inline';
-          document.getElementById('userName').textContent = user.name;
-          if (user.role === 'admin') document.getElementById('adminLink').style.display = 'inline';
-        }
-      } catch (e) {}
-    }
-
-    document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await fetch('/api/auth/logout', { method: 'POST' });
-      location.href = '/';
-    });
-
     async function loadBook() {
-      const res = await fetch(`/api/books/${bookId}`);
-      const book = await res.json();
+      const book = await fetch(`/api/books/${bookId}`).then(r => r.json());
       
-      document.getElementById('cover').src = book.coverUrl || 'https://via.placeholder.com/280x400';
+      document.getElementById('cover').src = convertDriveImageUrl(book.coverUrl) || PLACEHOLDER_IMG;
       document.getElementById('title').textContent = book.title;
       document.getElementById('author').textContent = book.author;
       document.getElementById('description').textContent = book.description || 'Sin descripción.';
       document.title = book.title + ' - Biblioteca Virtual';
 
-      // Check guest
+      let badges = '';
+      if (book.pdfUrl) badges += '<span style="background:#fef2f2;color:#dc2626;padding:4px 10px;border-radius:6px;font-size:0.85rem;margin-right:6px;">📄 PDF</span>';
+      if (book.content) badges += '<span style="background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:6px;font-size:0.85rem;">📝 Texto</span>';
+      document.getElementById('formatBadges').innerHTML = badges;
+
       const auth = await fetch('/api/auth/me');
       if (!auth.ok) document.getElementById('warning').style.display = 'block';
     }
@@ -91,6 +77,7 @@
     });
 
     checkAuth();
+    setupLogout();
     loadBook();
   </script>
 </body>

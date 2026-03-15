@@ -5,85 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lector - Biblioteca Virtual</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Georgia, serif; background: #fafafa; }
-    
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 100;
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Georgia,serif;background:#fafafa}
+    .header{position:fixed;top:0;left:0;right:0;background:#fff;border-bottom:1px solid #e5e7eb;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;z-index:100}
+    .header a{color:#6b7280;text-decoration:none}
+    .title{text-align:center}
+    .title h1{font-size:1rem}
+    .title p{font-size:0.75rem;color:#6b7280}
+    .controls button{padding:0.5rem 0.75rem;margin-left:0.25rem;border:1px solid #e5e7eb;border-radius:6px;background:#fff;cursor:pointer}
+    .controls button.active{background:#1a1a2e;color:#fff}
+    .format-toggle{display:flex;justify-content:center;gap:1rem;padding:1rem;background:#f3f4f6;margin-top:60px}
+    .format-toggle button{padding:0.75rem 1.5rem;border:2px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;transition:all 0.2s}
+    .format-toggle button.active{border-color:#e94560;background:#e94560;color:#fff}
+    .format-toggle button:hover:not(.active){border-color:#1a1a2e}
+    .content-text{max-width:700px;margin:2rem auto;padding:2rem;line-height:1.9;color:#1f2937;display:none}
+    .content-text.active{display:block}
+    .content-text p{margin-bottom:1.5rem;text-indent:2rem}
+    .content-pdf{width:100%;height:calc(100vh - 140px);display:none}
+    .content-pdf.active{display:block}
+    .content-pdf iframe{width:100%;height:100%;border:none}
+    .no-content{text-align:center;padding:4rem 2rem;color:#6b7280;margin-top:60px}
+    .no-content h2{margin-bottom:1rem;color:#1a1a2e}
+    @media(max-width:768px){
+      .header{padding:0.75rem 1rem}
+      .title h1{font-size:0.9rem}
+      .format-toggle{flex-direction:column;gap:0.5rem;padding:0.75rem}
+      .format-toggle button{padding:0.6rem 1rem;font-size:0.9rem}
+      .content-text{padding:1.5rem 1rem;margin:1.5rem auto}
+      .content-pdf{height:calc(100vh - 160px)}
     }
-    .header a { color: #6b7280; text-decoration: none; }
-    .title { text-align: center; }
-    .title h1 { font-size: 1rem; }
-    .title p { font-size: 0.75rem; color: #6b7280; }
-    .controls button { padding: 0.5rem 0.75rem; margin-left: 0.25rem; border: 1px solid #e5e7eb; border-radius: 6px; background: white; cursor: pointer; }
-    .controls button.active { background: #1a1a2e; color: white; }
-    
-    .format-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      padding: 1rem;
-      background: #f3f4f6;
-      margin-top: 60px;
+    @media(max-width:480px){
+      .header{flex-wrap:wrap;gap:0.5rem;padding:0.5rem 0.75rem}
+      .title h1{font-size:0.85rem}
+      .controls button{padding:0.4rem 0.5rem;font-size:0.85rem}
+      .content-text{padding:1rem 0.75rem;font-size:0.95rem}
     }
-    .format-toggle button {
-      padding: 0.75rem 1.5rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      background: white;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .format-toggle button.active {
-      border-color: #e94560;
-      background: #e94560;
-      color: white;
-    }
-    .format-toggle button:hover:not(.active) {
-      border-color: #1a1a2e;
-    }
-    
-    .content-text {
-      max-width: 700px;
-      margin: 2rem auto;
-      padding: 2rem;
-      line-height: 1.9;
-      color: #1f2937;
-      display: none;
-    }
-    .content-text.active { display: block; }
-    .content-text p { margin-bottom: 1.5rem; text-indent: 2rem; }
-    
-    .content-pdf {
-      width: 100%;
-      height: calc(100vh - 140px);
-      display: none;
-    }
-    .content-pdf.active { display: block; }
-    .content-pdf iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    
-    .no-content {
-      text-align: center;
-      padding: 4rem 2rem;
-      color: #6b7280;
-      margin-top: 60px;
-    }
-    .no-content h2 { margin-bottom: 1rem; color: #1a1a2e; }
   </style>
 </head>
 <body>
@@ -105,7 +61,7 @@
   </div>
 
   <div class="content-pdf" id="contentPdf">
-    <iframe id="pdfViewer" src=""></iframe>
+    <iframe id="pdfViewer" src="" allow="autoplay"></iframe>
   </div>
 
   <div class="content-text" id="contentText"></div>
@@ -115,43 +71,34 @@
     <p>Este libro aún no tiene contenido disponible.</p>
   </div>
 
+  <script src="/javascript/common.js"></script>
   <script>
     const bookId = location.pathname.split('/').pop();
     let fontSize = 18;
-    let hasPdf = false;
-    let hasText = false;
 
     async function loadBook() {
-      const res = await fetch(`/api/books/${bookId}`);
-      const book = await res.json();
+      const book = await fetch(`/api/books/${bookId}`).then(r => r.json());
       
       document.getElementById('bookTitle').textContent = book.title;
       document.getElementById('bookAuthor').textContent = book.author;
       document.title = book.title + ' - Lector';
 
-      hasPdf = book.pdfUrl && book.pdfUrl.trim() !== '';
-      hasText = book.content && book.content.trim() !== '';
+      const hasPdf = book.pdfUrl?.trim();
+      const hasText = book.content?.trim();
 
-      // Configurar visor según contenido disponible
       if (hasPdf && hasText) {
-        // Ambos disponibles - mostrar toggle
         document.getElementById('formatToggle').style.display = 'flex';
-        document.getElementById('pdfViewer').src = book.pdfUrl;
+        document.getElementById('pdfViewer').src = convertPdfUrl(book.pdfUrl);
         document.getElementById('contentText').innerHTML = book.content.split('\n').map(p => `<p>${p}</p>`).join('');
-        showFormat('pdf'); // Por defecto mostrar PDF
+        showFormat('pdf');
       } else if (hasPdf) {
-        // Solo PDF
-        document.getElementById('formatToggle').style.display = 'none';
-        document.getElementById('pdfViewer').src = book.pdfUrl;
+        document.getElementById('pdfViewer').src = convertPdfUrl(book.pdfUrl);
         document.getElementById('contentPdf').classList.add('active');
       } else if (hasText) {
-        // Solo texto
-        document.getElementById('formatToggle').style.display = 'none';
         document.getElementById('contentText').innerHTML = book.content.split('\n').map(p => `<p>${p}</p>`).join('');
         document.getElementById('contentText').classList.add('active');
         document.getElementById('textControls').style.display = 'block';
       } else {
-        // Sin contenido
         document.getElementById('noContent').style.display = 'block';
       }
     }
@@ -163,19 +110,11 @@
       const btnText = document.getElementById('btnText');
       const textControls = document.getElementById('textControls');
 
-      if (format === 'pdf') {
-        pdf.classList.add('active');
-        text.classList.remove('active');
-        btnPdf.classList.add('active');
-        btnText.classList.remove('active');
-        textControls.style.display = 'none';
-      } else {
-        pdf.classList.remove('active');
-        text.classList.add('active');
-        btnPdf.classList.remove('active');
-        btnText.classList.add('active');
-        textControls.style.display = 'block';
-      }
+      pdf.classList.toggle('active', format === 'pdf');
+      text.classList.toggle('active', format === 'text');
+      btnPdf.classList.toggle('active', format === 'pdf');
+      btnText.classList.toggle('active', format === 'text');
+      textControls.style.display = format === 'text' ? 'block' : 'none';
     }
 
     function changeFont(delta) {

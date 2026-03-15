@@ -1,3 +1,4 @@
+// Biblioteca Virtual - Register
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = document.getElementById('name').value;
@@ -13,7 +14,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const data = await res.json();
     
     if (res.ok) {
-      window.location.href = '/';
+      location.href = '/';
     } else {
       alert(data.error || 'Error al registrarse');
     }

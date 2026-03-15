@@ -1,26 +1,57 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', sans-serif; background: #fafafa; }
-
+/* Login/Register Page Styles */
 .login-container { display: flex; min-height: 100vh; }
-.login-form { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 3rem; max-width: 450px; }
-.login-image { flex: 1; background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200') center/cover; display: none; }
-@media (min-width: 768px) { .login-image { display: block; } }
 
-.logo { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; text-decoration: none; margin-bottom: 2rem; }
-h1 { font-size: 1.75rem; color: #1a1a2e; margin-bottom: 0.5rem; }
-p { color: #6b7280; margin-bottom: 1.5rem; }
+.login-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+  max-width: 450px;
+  margin: 0 auto;
+}
 
-.form-group { margin-bottom: 1rem; }
-.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-.form-group input { width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
-.form-group input:focus { outline: none; border-color: #e94560; }
+.login-image {
+  flex: 1;
+  background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200') center/cover;
+  display: none;
+}
 
-.btn { width: 100%; padding: 0.875rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
-.btn-primary { background: #1a1a2e; color: white; }
-.btn-accent { background: #e94560; color: white; }
+.login-form .logo { margin-bottom: 1.5rem; }
+.login-form h1 { font-size: clamp(1.4rem, 4vw, 1.75rem); color: var(--primary); margin-bottom: 0.5rem; }
+.login-form p { color: var(--muted); margin-bottom: 1.25rem; font-size: 0.95rem; }
+.login-form .btn { width: 100%; padding: 0.8rem; }
+.btn-accent { background: var(--accent); color: white; }
 
-.demo { margin-top: 1.5rem; padding: 1rem; background: #f3f4f6; border-radius: 8px; font-size: 0.875rem; color: #6b7280; }
-.link { margin-top: 1.5rem; text-align: center; }
-.link a { color: #e94560; text-decoration: none; font-weight: 500; }
+.demo {
+  margin-top: 1.25rem;
+  padding: 0.9rem;
+  background: #f3f4f6;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
 
-.error { color: #dc2626; background: #fef2f2; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; }
+.link { margin-top: 1.25rem; text-align: center; font-size: 0.9rem; }
+.link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+
+.error {
+  color: var(--danger);
+  background: #fef2f2;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+@media (min-width: 768px) {
+  .login-image { display: block; }
+  .login-form { padding: 3rem; }
+}
+
+@media (max-width: 480px) {
+  .login-form { padding: 1.5rem; }
+  .login-form .logo { font-size: 1.1rem; margin-bottom: 1.25rem; }
+  .login-form .form-group input, .login-form .btn { padding: 0.7rem; }
+  .demo { padding: 0.75rem; font-size: 0.8rem; }
+}

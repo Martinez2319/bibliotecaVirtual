@@ -1,5 +1,29 @@
-.catalog { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-.filters { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
-.filters input, .filters select { padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
-.filters input { flex: 1; min-width: 200px; }
-.books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.5rem; }
+/* Catalog Page Styles */
+.catalog { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+.catalog h1 { font-size: clamp(1.3rem, 4vw, 1.75rem); }
+
+.filters { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.filters input, .filters select {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  background: white;
+}
+.filters input { flex: 1; min-width: 180px; }
+.filters select { min-width: 150px; }
+
+.books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+
+@media (max-width: 768px) {
+  .catalog { padding: 1.5rem 1rem; }
+  .filters { flex-direction: column; }
+  .filters input, .filters select { width: 100%; min-width: unset; }
+  .books-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .catalog { padding: 1rem 0.75rem; }
+  .filters input, .filters select { padding: 0.65rem; font-size: 0.95rem; }
+  .books-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+}
