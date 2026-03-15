@@ -18,6 +18,9 @@ function processUrls(book) {
   return obj;
 }
 
+// Proyección para listados (campos mínimos necesarios)
+const LIST_PROJECTION = { title: 1, author: 1, coverUrl: 1, categories: 1, views: 1, createdAt: 1 };
+
 // GET todos los libros
 router.get('/', async (req, res) => {
   try {
@@ -32,7 +35,9 @@ router.get('/', async (req, res) => {
     }
     if (category) query.categories = category;
 
-    const books = await Book.find(query).sort({ [sort]: sort === 'title' ? 1 : -1 });
+    const books = await Book.find(query, LIST_PROJECTION)
+      .sort({ [sort]: sort === 'title' ? 1 : -1 })
+      .lean();
     res.json(books.map(processUrls));
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -42,7 +47,11 @@ router.get('/', async (req, res) => {
 // GET destacados
 router.get('/featured', async (req, res) => {
   try {
-    const books = await Book.find().sort({ views: -1 }).limit(10);
+    const books = await Book.find({}, LIST_PROJECTION)
+      .sort({ views: -1 })
+      .limit(10)
+      .lean();
+    res.setHeader('Cache-Control', 'public, max-age=60');
     res.json(books.map(processUrls));
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -52,7 +61,11 @@ router.get('/featured', async (req, res) => {
 // GET recientes
 router.get('/recent', async (req, res) => {
   try {
-    const books = await Book.find().sort({ createdAt: -1 }).limit(10);
+    const books = await Book.find({}, LIST_PROJECTION)
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+    res.setHeader('Cache-Control', 'public, max-age=60');
     res.json(books.map(processUrls));
   } catch (e) {
     res.status(500).json({ error: e.message });

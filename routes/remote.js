@@ -105,23 +105,76 @@ router.get('/files', adminOnly, async (req, res) => {
   }
 });
 
-// GET proxy archivo
+// GET proxy archivo CON CACHÉ
+const fileCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
 router.get('/file/:type/:filename', async (req, res) => {
   try {
     const { type, filename } = req.params;
     if (!['pdf', 'cover'].includes(type)) return res.status(400).json({ error: 'Tipo inválido' });
 
+    const cacheKey = `${type}:${filename}`;
+    const cached = fileCache.get(cacheKey);
+    
+    // Para covers, usar caché en memoria
+    if (type === 'cover' && cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      res.setHeader('Content-Type', cached.contentType);
+      res.setHeader('Cache-Control', 'public, max-age=300');
+      res.setHeader('X-Cache', 'HIT');
+      return res.send(cached.data);
+    }
+
     const source = await getSource(true);
     if (!source) return res.status(404).json({ error: 'PC no conectado' });
 
+    // Para PDFs, usar streaming directo sin caché
+    if (type === 'pdf') {
+      const response = await axios.get(`${source.url}/file/${type}/${filename}`, {
+        headers: { 'x-api-key': API_KEY() },
+        responseType: 'stream',
+        timeout: 60000
+      });
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      if (response.headers['content-length']) {
+        res.setHeader('Content-Length', response.headers['content-length']);
+      }
+      response.data.pipe(res);
+      return;
+    }
+
+    // Para covers, descargar y cachear
     const response = await axios.get(`${source.url}/file/${type}/${filename}`, {
       headers: { 'x-api-key': API_KEY() },
-      responseType: 'stream',
-      timeout: 30000
+      responseType: 'arraybuffer',
+      timeout: 15000
     });
 
-    if (response.headers['content-type']) res.setHeader('Content-Type', response.headers['content-type']);
-    response.data.pipe(res);
+    const contentType = response.headers['content-type'] || 'image/jpeg';
+    
+    // Guardar en caché (solo si es menor a 2MB)
+    if (response.data.length < 2 * 1024 * 1024) {
+      fileCache.set(cacheKey, {
+        data: Buffer.from(response.data),
+        contentType,
+        timestamp: Date.now()
+      });
+      
+      // Limpiar caché vieja cada 100 entradas
+      if (fileCache.size > 100) {
+        const now = Date.now();
+        for (const [key, value] of fileCache) {
+          if (now - value.timestamp > CACHE_TTL) fileCache.delete(key);
+        }
+      }
+    }
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('X-Cache', 'MISS');
+    res.send(response.data);
   } catch (e) {
     res.status(500).json({ error: 'No se pudo obtener el archivo' });
   }

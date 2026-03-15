@@ -21,9 +21,12 @@
     .content-text{max-width:700px;margin:2rem auto;padding:2rem;line-height:1.9;color:#1f2937;display:none}
     .content-text.active{display:block}
     .content-text p{margin-bottom:1.5rem;text-indent:2rem}
-    .content-pdf{width:100%;height:calc(100vh - 140px);display:none}
+    .content-pdf{width:100%;height:calc(100vh - 140px);display:none;position:relative}
     .content-pdf.active{display:block}
     .content-pdf iframe{width:100%;height:100%;border:none}
+    .pdf-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#6b7280}
+    .pdf-loading .spinner{width:40px;height:40px;border:3px solid #e5e7eb;border-top-color:#e94560;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
     .no-content{text-align:center;padding:4rem 2rem;color:#6b7280;margin-top:60px}
     .no-content h2{margin-bottom:1rem;color:#1a1a2e}
     @media(max-width:768px){
@@ -61,7 +64,11 @@
   </div>
 
   <div class="content-pdf" id="contentPdf">
-    <iframe id="pdfViewer" src="" allow="autoplay"></iframe>
+    <div class="pdf-loading" id="pdfLoading">
+      <div class="spinner"></div>
+      <p>Cargando PDF...</p>
+    </div>
+    <iframe id="pdfViewer" src="" allow="autoplay" onload="document.getElementById('pdfLoading').style.display='none'"></iframe>
   </div>
 
   <div class="content-text" id="contentText"></div>

@@ -1,5 +1,3 @@
-// Biblioteca Virtual - Index Page
-
 // PayPal
 let paypalSdkLoaded = false;
 
@@ -73,35 +71,105 @@ function setAmount(val) {
   document.getElementById('donateAmount').value = val;
 }
 
-// Cargar datos
-async function loadFeaturedBooks() {
-  const books = await fetch('/api/books/featured').then(r => r.json());
-  document.getElementById('featuredBooks').innerHTML = books.map(renderBookCard).join('');
-}
-
-async function loadRecentBooks() {
-  const books = await fetch('/api/books/recent').then(r => r.json());
-  document.getElementById('recentBooks').innerHTML = books.map(renderBookCard).join('');
-}
-
-async function loadCategories() {
-  const categories = await fetch('/api/categories').then(r => r.json());
-  document.getElementById('categories').innerHTML = categories.map(c => `
-    <a href="/catalog?category=${encodeURIComponent(c.name)}" class="category-card">
-      <div style="font-size:1.5rem;margin-bottom:0.5rem;">📖</div>
-      ${escapeHtml(c.name)}
-    </a>
+// Skeleton loaders para carga rápida
+function renderSkeletonCards(count = 4) {
+  return Array(count).fill(`
+    <div class="book-card skeleton-card">
+      <div class="skeleton skeleton-img"></div>
+      <div class="book-card-content">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-text"></div>
+      </div>
+    </div>
   `).join('');
 }
 
-// Init
+function renderSkeletonCategories(count = 6) {
+  return Array(count).fill(`
+    <div class="category-card skeleton-category">
+      <div class="skeleton skeleton-icon"></div>
+      <div class="skeleton skeleton-text"></div>
+    </div>
+  `).join('');
+}
+
+// Mostrar skeletons inmediatamente
+function showSkeletons() {
+  document.getElementById('featuredBooks').innerHTML = renderSkeletonCards(4);
+  document.getElementById('recentBooks').innerHTML = renderSkeletonCards(4);
+  document.getElementById('categories').innerHTML = renderSkeletonCategories(6);
+}
+
+// Cargar datos en paralelo con caché
+const dataCache = { featured: null, recent: null, categories: null };
+
+async function loadFeaturedBooks() {
+  try {
+    if (dataCache.featured) {
+      document.getElementById('featuredBooks').innerHTML = dataCache.featured.map(renderBookCard).join('');
+      return;
+    }
+    const books = await fetch('/api/books/featured').then(r => r.json());
+    dataCache.featured = books;
+    document.getElementById('featuredBooks').innerHTML = books.map(renderBookCard).join('');
+  } catch(e) {
+    document.getElementById('featuredBooks').innerHTML = '<p style="color:#888;padding:1rem;">Error al cargar</p>';
+  }
+}
+
+async function loadRecentBooks() {
+  try {
+    if (dataCache.recent) {
+      document.getElementById('recentBooks').innerHTML = dataCache.recent.map(renderBookCard).join('');
+      return;
+    }
+    const books = await fetch('/api/books/recent').then(r => r.json());
+    dataCache.recent = books;
+    document.getElementById('recentBooks').innerHTML = books.map(renderBookCard).join('');
+  } catch(e) {
+    document.getElementById('recentBooks').innerHTML = '<p style="color:#888;padding:1rem;">Error al cargar</p>';
+  }
+}
+
+async function loadCategories() {
+  try {
+    if (dataCache.categories) {
+      document.getElementById('categories').innerHTML = dataCache.categories.map(c => `
+        <a href="/catalog?category=${encodeURIComponent(c.name)}" class="category-card">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">📖</div>
+          ${escapeHtml(c.name)}
+        </a>
+      `).join('');
+      return;
+    }
+    const categories = await fetch('/api/categories').then(r => r.json());
+    dataCache.categories = categories;
+    document.getElementById('categories').innerHTML = categories.map(c => `
+      <a href="/catalog?category=${encodeURIComponent(c.name)}" class="category-card">
+        <div style="font-size:1.5rem;margin-bottom:0.5rem;">📖</div>
+        ${escapeHtml(c.name)}
+      </a>
+    `).join('');
+  } catch(e) {
+    document.getElementById('categories').innerHTML = '<p style="color:#888;padding:1rem;">Error al cargar</p>';
+  }
+}
+
+// Init con carga paralela
 async function init() {
-  await checkAuth();
-  setupLogout();
+  // Mostrar skeletons INMEDIATAMENTE
+  showSkeletons();
+  
+  // Iniciar auth y seed en segundo plano (no bloquea UI)
+  checkAuth().then(() => setupLogout());
   fetch('/api/seed', { method: 'POST' });
-  loadFeaturedBooks();
-  loadRecentBooks();
-  loadCategories();
+  
+  // Cargar TODO en paralelo - esto es clave para velocidad
+  await Promise.all([
+    loadFeaturedBooks(),
+    loadRecentBooks(),
+    loadCategories()
+  ]);
   
   document.getElementById('donateBtn')?.addEventListener('click', e => {
     e.preventDefault();

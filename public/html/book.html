@@ -44,14 +44,61 @@
     </div>
   </div>
 
+  <style>
+    /* Skeleton para portada del libro */
+    .cover-skeleton {
+      width: 100%;
+      height: 350px;
+      background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-pulse 1.2s infinite;
+      border-radius: 8px;
+    }
+    @keyframes skeleton-pulse {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .book-cover img {
+      transition: opacity 0.3s ease;
+    }
+    .book-cover img.loading {
+      opacity: 0;
+    }
+  </style>
   <script src="/javascript/common.js"></script>
   <script>
     const bookId = location.pathname.split('/').pop();
+    
+    // Mostrar skeleton inmediatamente
+    const coverEl = document.getElementById('cover');
+    coverEl.classList.add('loading');
+    coverEl.insertAdjacentHTML('beforebegin', '<div class="cover-skeleton" id="coverSkeleton"></div>');
 
     async function loadBook() {
-      const book = await fetch(`/api/books/${bookId}`).then(r => r.json());
+      // Iniciar carga de datos y auth en paralelo
+      const [bookRes, authRes] = await Promise.all([
+        fetch(`/api/books/${bookId}`),
+        fetch('/api/auth/me')
+      ]);
       
-      document.getElementById('cover').src = convertDriveImageUrl(book.coverUrl) || PLACEHOLDER_IMG;
+      const book = await bookRes.json();
+      
+      // Precargar imagen antes de mostrar
+      const coverUrl = convertDriveImageUrl(book.coverUrl) || PLACEHOLDER_IMG;
+      const img = new Image();
+      img.onload = () => {
+        coverEl.src = coverUrl;
+        coverEl.classList.remove('loading');
+        document.getElementById('coverSkeleton')?.remove();
+      };
+      img.onerror = () => {
+        coverEl.src = PLACEHOLDER_IMG;
+        coverEl.classList.remove('loading');
+        document.getElementById('coverSkeleton')?.remove();
+      };
+      img.src = coverUrl;
+      
+      // Actualizar UI inmediatamente con datos de texto
       document.getElementById('title').textContent = book.title;
       document.getElementById('author').textContent = book.author;
       document.getElementById('description').textContent = book.description || 'Sin descripción.';
@@ -62,8 +109,7 @@
       if (book.content) badges += '<span style="background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:6px;font-size:0.85rem;">📝 Texto</span>';
       document.getElementById('formatBadges').innerHTML = badges;
 
-      const auth = await fetch('/api/auth/me');
-      if (!auth.ok) document.getElementById('warning').style.display = 'block';
+      if (!authRes.ok) document.getElementById('warning').style.display = 'block';
     }
 
     document.getElementById('readBtn').addEventListener('click', async () => {
